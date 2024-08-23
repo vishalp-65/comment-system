@@ -4,6 +4,7 @@ import {
     setPersistence,
     browserLocalPersistence,
 } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
 
 // Your Firebase configuration object
 const firebaseConfig = {
@@ -20,6 +21,9 @@ const app = initializeApp(firebaseConfig);
 
 // Initialize Firebase Auth and set persistence
 const auth = getAuth(app);
+
+const db = getFirestore(app);
+
 setPersistence(auth, browserLocalPersistence)
     .then(() => {
         console.log("Session persistence set to localStorage");
@@ -28,4 +32,4 @@ setPersistence(auth, browserLocalPersistence)
         console.error("Error setting persistence:", error);
     });
 
-export { auth };
+export { auth, db };
