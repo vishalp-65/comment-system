@@ -4,8 +4,7 @@ import TextEditor from "./reusable/TextEditor";
 import toast from "react-hot-toast";
 import { useAuth } from "@/context/AuthContext";
 import axios from "axios";
-// import CommentList from "./CommentList";
-// import { saveComment } from "../lib/saveComment";
+import CommentsList from "./CommentList";
 
 const CommentSection = () => {
     const { user } = useAuth();
@@ -59,10 +58,14 @@ const CommentSection = () => {
                 </div>
             </div>
 
-            <div className="mt-5">
-                <TextEditor onSave={handleSaveComment} />
+            <div className="my-5">
+                <TextEditor
+                    onSave={handleSaveComment}
+                    isReply={false}
+                    onCancel={() => {}}
+                />
             </div>
-            {/* <CommentList /> */}
+            <CommentsList />
         </div>
     );
 };

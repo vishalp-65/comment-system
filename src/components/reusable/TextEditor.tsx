@@ -8,7 +8,15 @@ interface FormatType {
     underline: boolean;
 }
 
-const TextEditor = ({ onSave }: { onSave: (content: string) => void }) => {
+const TextEditor = ({
+    onSave,
+    onCancel,
+    isReply = false,
+}: {
+    onSave: (content: string) => void;
+    onCancel: () => void;
+    isReply: boolean;
+}) => {
     const editorRef = useRef<HTMLDivElement>(null);
     const [activeFormat, setActiveFormat] = useState<FormatType>({
         bold: false,
@@ -41,6 +49,13 @@ const TextEditor = ({ onSave }: { onSave: (content: string) => void }) => {
                 underline: false,
             });
         }
+    };
+
+    const handleCancel = () => {
+        if (editorRef.current) {
+            editorRef.current.innerHTML = ""; // Clear editor on cancel
+        }
+        onCancel(); // Hide TextEditor
     };
 
     return (
@@ -101,13 +116,23 @@ const TextEditor = ({ onSave }: { onSave: (content: string) => void }) => {
                     <ImAttachment />
                 </div>
 
-                {/* Save button */}
-                <button
-                    onClick={handleSave}
-                    className="p-3 mt-2 bg-black/90 h-full text-white rounded-md"
-                >
-                    Send
-                </button>
+                {/* Save and Cancel buttons */}
+                <div>
+                    {isReply && (
+                        <button
+                            onClick={handleCancel}
+                            className="p-3 mt-2 border border-gray-400 text-black h-full rounded-md mr-2"
+                        >
+                            Cancel
+                        </button>
+                    )}
+                    <button
+                        onClick={handleSave}
+                        className="p-3 mt-2 bg-black/90 h-full text-white rounded-md"
+                    >
+                        Send
+                    </button>
+                </div>
             </div>
         </div>
     );
