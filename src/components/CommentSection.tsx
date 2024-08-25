@@ -1,13 +1,28 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import TextEditor from "./reusable/TextEditor";
 import toast from "react-hot-toast";
 import { useAuth } from "@/context/AuthContext";
 import axios from "axios";
 import CommentsList from "./CommentList";
+import { Comment } from "@/types/comment";
 
 const CommentSection = () => {
     const { user } = useAuth();
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [comments, setComments] = useState<Comment[]>([]);
+
+    const fetchComments = async () => {
+        setIsLoading(true);
+        try {
+            const { data } = await axios.get("/api/comment");
+            setComments(data.comments);
+        } catch (error) {
+            console.error("Failed to fetch comments", error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     const handleSaveComment = async (content: string) => {
         // await saveComment(content);
@@ -34,6 +49,8 @@ const CommentSection = () => {
                 userPhoto: user?.photoURL,
                 userId: user?.uid,
             });
+
+            fetchComments();
 
             // setText('');
             // setFile(null);
@@ -65,7 +82,7 @@ const CommentSection = () => {
                     onCancel={() => {}}
                 />
             </div>
-            <CommentsList />
+            <CommentsList fetchComments={fetchComments} comments={comments} />
         </div>
     );
 };

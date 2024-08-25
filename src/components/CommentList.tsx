@@ -6,38 +6,18 @@ import { useAuth } from "@/context/AuthContext";
 import CommentCard from "./reusable/CommentCard";
 import toast from "react-hot-toast";
 
-interface Comment {
-    id: string;
-    content: string;
-    userId: string;
-    userName: string;
-    fileURL: string;
-    userPhoto: string;
-    createdAt: { seconds: number; nanoseconds: number };
-    replies: Comment[];
+interface CommentListProps {
+    comments: any;
+    fetchComments: () => void;
 }
 
-const CommentsList = () => {
+const CommentsList = ({ comments, fetchComments }: CommentListProps) => {
     const { user } = useAuth();
-    const [comments, setComments] = useState<Comment[]>([]);
+
     const [activeCommentId, setActiveCommentId] = useState<string | null>(null);
-
-    useEffect(() => {
-        const fetchComments = async () => {
-            try {
-                const { data } = await axios.get("/api/comment");
-                setComments(data.comments);
-            } catch (error) {
-                console.error("Failed to fetch comments", error);
-            }
-        };
-
-        fetchComments();
-    }, []);
 
     const handleReply = async (content: string, commentId: string) => {
         if (!content) return;
-        console.log("reply", content);
 
         try {
             await axios.post(`/api/comment/${commentId}/reply`, {
@@ -47,8 +27,7 @@ const CommentsList = () => {
                 userPhoto: user?.photoURL,
             });
             setActiveCommentId(null);
-            const { data } = await axios.get("/api/comment"); // Refresh comments
-            setComments(data.comments);
+            fetchComments();
 
             toast.success("Successfully replied");
         } catch (error) {
@@ -61,27 +40,65 @@ const CommentsList = () => {
         setActiveCommentId(null); // Hide TextEditor
     };
 
+    const onReact = async (
+        emoji: string,
+        commentId: string,
+        isReply: boolean
+    ) => {
+        if (!commentId || !emoji) {
+            toast.error("Invalid comment ID or emoji");
+            return;
+        }
+
+        try {
+            const res = await axios.post(
+                `api/comment/${commentId}/reactions?isReply=${isReply}`,
+                {
+                    userId: user?.uid,
+                    emoji: emoji,
+                }
+            );
+            fetchComments();
+
+            toast.success("Reaction added");
+        } catch (error) {
+            console.log("error", error);
+            toast.error("Reaction not added");
+        }
+    };
+
+    useEffect(() => {
+        fetchComments();
+    }, []);
+
     return (
         <div>
-            {comments.map((comment) => (
-                <div key={comment.id}>
-                    <CommentCard
-                        comment={comment}
-                        onReply={() => setActiveCommentId(comment.id)}
-                    />
-                    {activeCommentId === comment.id && (
-                        <div className="ml-8 mt-2">
-                            <TextEditor
-                                onSave={(content) =>
-                                    handleReply(content, comment.id)
-                                }
-                                onCancel={handleCancelReply}
-                                isReply={true}
-                            />
-                        </div>
-                    )}
+            {comments.length !== 0 ? (
+                comments.map((comment: any) => (
+                    <div key={comment.id}>
+                        <CommentCard
+                            comment={comment}
+                            onReply={() => setActiveCommentId(comment.id)}
+                            onReact={onReact}
+                        />
+                        {activeCommentId === comment.id && (
+                            <div className="ml-8 mt-2">
+                                <TextEditor
+                                    onSave={(content) =>
+                                        handleReply(content, comment.id)
+                                    }
+                                    onCancel={handleCancelReply}
+                                    isReply={true}
+                                />
+                            </div>
+                        )}
+                    </div>
+                ))
+            ) : (
+                <div className="flex items-center justify-center mt-14 mb-10 text-gray-500">
+                    <p>No comments found</p>
                 </div>
-            ))}
+            )}
         </div>
     );
 };

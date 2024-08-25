@@ -2,12 +2,12 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { db } from "../../lib/firebaseConfig";
 import {
     collection,
-    addDoc,
+    getDocs,
+    doc,
+    getDoc,
     query,
     orderBy,
-    limit,
-    getDocs,
-    startAfter,
+    addDoc,
     Timestamp,
 } from "firebase/firestore";
 import { handleError } from "../../utils/errorHandler";
@@ -20,32 +20,43 @@ export default async function handler(
 
     if (method === "GET") {
         try {
-            const {
-                sortBy = "createdAt",
-                pageSize = 8,
-                lastVisible,
-            } = req.query;
-            const commentsQuery = lastVisible
-                ? query(
-                      collection(db, "comments"),
-                      orderBy(sortBy as string, "desc"),
-                      startAfter(lastVisible),
-                      limit(Number(pageSize))
-                  )
-                : query(
-                      collection(db, "comments"),
-                      orderBy(sortBy as string, "desc"),
-                      limit(Number(pageSize))
-                  );
+            const { sortBy = "createdAt", pageSize = 8 } = req.query;
+
+            // Fetch comments
+            const commentsQuery = query(
+                collection(db, "comments"),
+                orderBy(sortBy as string, "desc")
+            );
 
             const querySnapshot = await getDocs(commentsQuery);
-            const comments = querySnapshot.docs.map((doc) => ({
-                id: doc.id,
-                ...doc.data(),
-            }));
-            const lastDoc = querySnapshot.docs[querySnapshot.docs.length - 1];
+            const comments = [];
 
-            res.status(200).json({ comments, lastVisible: lastDoc?.id });
+            for (const commentDoc of querySnapshot.docs) {
+                const commentData = commentDoc.data();
+
+                // Fetch replies for each comment
+                const replies = [];
+                if (commentData.replies && commentData.replies.length > 0) {
+                    for (const replyId of commentData.replies) {
+                        const replyDocRef = doc(db, "replies", replyId);
+                        const replyDoc = await getDoc(replyDocRef);
+                        if (replyDoc.exists()) {
+                            replies.push({
+                                id: replyDoc.id,
+                                ...replyDoc.data(),
+                            });
+                        }
+                    }
+                }
+
+                comments.push({
+                    id: commentDoc.id,
+                    ...commentData,
+                    replies, // Include the fetched replies in the response
+                });
+            }
+
+            res.status(200).json({ comments });
         } catch (error) {
             handleError(error, res);
         }

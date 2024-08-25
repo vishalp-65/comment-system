@@ -1,6 +1,13 @@
-import { db } from "@/lib/firebaseConfig"; // Adjust this import based on your project structure
-import { arrayUnion, updateDoc, doc } from "firebase/firestore";
-import { NextApiRequest, NextApiResponse } from "next";
+import { db } from "@/lib/firebaseConfig";
+import {
+    arrayUnion,
+    updateDoc,
+    doc,
+    addDoc,
+    collection,
+    Timestamp,
+} from "firebase/firestore";
+import type { NextApiRequest, NextApiResponse } from "next";
 
 export default async function handler(
     req: NextApiRequest,
@@ -11,26 +18,32 @@ export default async function handler(
     if (req.method === "POST") {
         const { content, userId, userName, userPhoto } = req.body;
 
-        console.log({ content, userId, userName, userPhoto });
-
         try {
-            const commentRef = doc(db, "comments", commentId as string);
-
-            // Create a reply object
-            const reply = {
+            // Create a new reply in the "replies" collection with a unique ID
+            const replyDocRef = await addDoc(collection(db, "replies"), {
                 content,
                 userId,
                 userName,
                 userPhoto,
-                createdAt: new Date(), // Use the current date/time
-            };
-
-            // Update the document with the new reply using arrayUnion
-            await updateDoc(commentRef, {
-                replies: arrayUnion(reply),
+                commentId,
+                createdAt: Timestamp.fromDate(new Date()),
+                reactions: [],
+                replies: [], // Initialize empty replies array for nested replies
             });
 
-            res.status(200).json({ message: "Reply added successfully" });
+            // Get the ID of the newly created reply
+            const replyId = replyDocRef.id;
+
+            // Update the "comments" collection by adding the replyId to the replies array
+            const commentRef = doc(db, "comments", commentId as string);
+            await updateDoc(commentRef, {
+                replies: arrayUnion(replyId), // Add only the replyId
+            });
+
+            res.status(200).json({
+                message: "Reply added successfully",
+                replyId,
+            });
         } catch (error) {
             console.error("Failed to add reply:", error);
             res.status(500).json({ error: "Failed to add reply" });
