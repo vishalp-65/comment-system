@@ -45,6 +45,10 @@ const CommentsList = ({ comments, fetchComments }: CommentListProps) => {
         commentId: string,
         isReply: boolean
     ) => {
+        if (!user) {
+            toast.error("Please login for reaction and comment");
+            return;
+        }
         if (!commentId || !emoji) {
             toast.error("Invalid comment ID or emoji");
             return;

@@ -1,5 +1,11 @@
 import { db } from "@/lib/firebaseConfig";
-import { arrayUnion, updateDoc, doc } from "firebase/firestore";
+import {
+    updateDoc,
+    doc,
+    arrayRemove,
+    arrayUnion,
+    getDoc,
+} from "firebase/firestore";
 import type { NextApiRequest, NextApiResponse } from "next";
 
 export default async function handler(
@@ -12,19 +18,46 @@ export default async function handler(
         const { userId, emoji } = req.body;
 
         try {
-            // Determine the correct collection based on whether it's a comment or a reply
+            if (!userId || !emoji || !commentId) {
+                return res.status(400).json({ error: "Fields are missing" });
+            }
+
             const collectionName = isReply === "true" ? "replies" : "comments";
             const commentRef = doc(db, collectionName, commentId as string);
 
-            // Update the document with the new reaction
-            await updateDoc(commentRef, {
-                reactions: arrayUnion({ userId, emoji }),
-            });
+            // Use getDoc to fetch the current comment data
+            const commentSnap = await getDoc(commentRef);
+            const commentData = commentSnap.data();
 
-            res.status(200).json({ message: "Reaction added successfully" });
+            if (!commentData) {
+                return res.status(404).json({ error: "Comment not found" });
+            }
+
+            const reactions = commentData.reactions || [];
+
+            // Find existing reaction by user
+            const existingReaction = reactions.find(
+                (reaction: any) => reaction.userId === userId
+            );
+
+            if (existingReaction) {
+                // Remove the existing reaction
+                await updateDoc(commentRef, {
+                    reactions: arrayRemove(existingReaction),
+                });
+            }
+
+            if (!existingReaction || existingReaction.emoji !== emoji) {
+                // Add the new reaction only if it's different from the existing one
+                await updateDoc(commentRef, {
+                    reactions: arrayUnion({ userId, emoji, count: 1 }),
+                });
+            }
+
+            res.status(200).json({ message: "Reaction updated successfully" });
         } catch (error) {
-            console.error("Failed to add reaction:", error);
-            res.status(500).json({ error: "Failed to add reaction" });
+            console.error("Failed to update reaction:", error);
+            res.status(500).json({ error: "Failed to update reaction" });
         }
     } else {
         res.status(405).json({ error: "Method not allowed" });

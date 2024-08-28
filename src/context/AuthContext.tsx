@@ -19,6 +19,7 @@ import toast from "react-hot-toast";
 
 interface AuthContextProps {
     user: User | null;
+    isLoading: boolean;
     login: () => void;
     logout: () => void;
 }
@@ -27,6 +28,7 @@ const AuthContext = createContext<AuthContextProps | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [user, setUser] = useState<User | null>(null);
+    const [isLoading, setIsLoading] = useState<boolean>(false);
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -36,6 +38,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }, []);
 
     const login = async () => {
+        setIsLoading(true);
         try {
             const provider = new GoogleAuthProvider();
             await signInWithPopup(auth, provider);
@@ -43,6 +46,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         } catch (error) {
             console.error("Login failed", error);
             toast.error("Login failed");
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -57,7 +62,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ user, login, logout }}>
+        <AuthContext.Provider value={{ user, login, logout, isLoading }}>
             {children}
         </AuthContext.Provider>
     );

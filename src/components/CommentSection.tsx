@@ -1,48 +1,43 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import TextEditor from "./reusable/TextEditor";
 import toast from "react-hot-toast";
 import { useAuth } from "@/context/AuthContext";
 import axios from "axios";
 import CommentsList from "./CommentList";
 import { Comment } from "@/types/comment";
+import LoadingUI from "./loading/LoadingUI";
 
 const CommentSection = () => {
     const { user } = useAuth();
-    const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [isLoading, setIsLoading] = useState<boolean>(true); // Set to true initially to show loader on mount
     const [comments, setComments] = useState<Comment[]>([]);
 
+    // Fetch comments on component mount
+    useEffect(() => {
+        fetchComments();
+    }, []);
+
     const fetchComments = async () => {
-        setIsLoading(true);
         try {
             const { data } = await axios.get("/api/comment");
             setComments(data.comments);
+            console.log("comment data", comments);
         } catch (error) {
             console.error("Failed to fetch comments", error);
+            toast.error("Failed to load comments");
         } finally {
-            setIsLoading(false);
+            setIsLoading(false); // Ensure loading is set to false after fetching
         }
     };
 
     const handleSaveComment = async (content: string) => {
-        // await saveComment(content);
-        console.log("content", content);
         if (!content.trim()) {
             toast.error("Please enter a comment");
+            return;
         }
 
         try {
-            // let fileURL = '';
-            // if (file) {
-            //   const base64 = await convertToBase64(file);
-            //   const response = await axios.post('/api/upload', {
-            //     file: base64,
-            //     filename: file.name,
-            //     filetype: file.type,
-            //   });
-            //   fileURL = response.data.url;
-            // }
-
             await axios.post("/api/comment", {
                 content,
                 userName: user?.displayName,
@@ -50,23 +45,20 @@ const CommentSection = () => {
                 userId: user?.uid,
             });
 
-            fetchComments();
-
-            // setText('');
-            // setFile(null);
-            // onCommentAdded();
-            toast.success("comment created");
+            toast.success("Comment created");
+            fetchComments(); // Refetch comments after adding a new one
         } catch (error) {
-            console.error(error);
-            // handle error (show toast or alert)
-            toast.error("Comment to created");
+            console.error("Failed to create comment", error);
+            toast.error("Failed to create comment");
         }
     };
 
     return (
         <div className="commentShadow border py-5 px-7">
             <div className="flex items-center justify-between px-2">
-                <h1 className="text-2xl font-bold mb-4">Comments(3)</h1>
+                <h1 className="text-2xl font-bold mb-4">
+                    Comments ({comments.length})
+                </h1>
                 <div className="flex items-center justify-between rounded-md gap-3 border border-gray-300">
                     <p className="bg-slate-200 px-2 py-1.5 cursor-pointer">
                         Latest
@@ -82,7 +74,15 @@ const CommentSection = () => {
                     onCancel={() => {}}
                 />
             </div>
-            <CommentsList fetchComments={fetchComments} comments={comments} />
+
+            {isLoading ? (
+                <LoadingUI />
+            ) : (
+                <CommentsList
+                    fetchComments={fetchComments}
+                    comments={comments}
+                />
+            )}
         </div>
     );
 };

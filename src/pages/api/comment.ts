@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { db } from "../../lib/firebaseConfig";
+import { db } from "@/lib/firebaseConfig";
 import {
     collection,
     getDocs,
@@ -10,7 +10,7 @@ import {
     addDoc,
     Timestamp,
 } from "firebase/firestore";
-import { handleError } from "../../utils/errorHandler";
+import { handleError } from "@/utils/errorHandler";
 
 export default async function handler(
     req: NextApiRequest,
@@ -49,9 +49,13 @@ export default async function handler(
                     }
                 }
 
+                // Attach reactions with their counts
+                const reactions = commentData.reactions || [];
+
                 comments.push({
                     id: commentDoc.id,
                     ...commentData,
+                    reactions,
                     replies, // Include the fetched replies in the response
                 });
             }

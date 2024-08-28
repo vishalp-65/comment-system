@@ -1,17 +1,23 @@
+"use client";
 import CommentSection from "@/components/CommentSection";
-import LoginButton from "@/components/LoginButton";
+import LoadingUI from "@/components/loading/LoadingUI";
 import NavBar from "@/components/NavBar";
-import { AuthProvider } from "@/context/AuthContext";
-import { Toaster } from "react-hot-toast";
+import { useAuth } from "@/context/AuthContext";
 
 export default function Home() {
+    const { isLoading } = useAuth();
+
+    if (isLoading) {
+        console.log("Hit");
+        return <LoadingUI />;
+    }
+
     return (
-        <AuthProvider>
+        <>
             <NavBar />
-            <Toaster />
             <div className="w-full p-10">
                 <CommentSection />
             </div>
-        </AuthProvider>
+        </>
     );
 }

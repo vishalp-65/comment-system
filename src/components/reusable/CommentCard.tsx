@@ -3,9 +3,12 @@ import Image from "next/image";
 import React, { useState } from "react";
 import { MdOutlineEmojiEmotions } from "react-icons/md";
 import EmojiContainer from "../EmojiContainer";
+import { int } from "aws-sdk/clients/datapipeline";
 
 interface Reaction {
     emoji: string;
+    userId: string;
+    count: int;
 }
 
 interface CommentCardProps {
@@ -90,9 +93,17 @@ const CommentCard = ({ comment, onReply, onReact }: CommentCardProps) => {
                 {comment?.reactions?.map((reaction) => (
                     <div
                         key={reaction.emoji}
-                        className="flex items-center gap-1"
+                        className="flex items-center gap-1 cursor-pointer"
                     >
-                        <span>{reaction.emoji}</span>
+                        <div
+                            className="bg-gray-200 px-1 rounded-full space-x-1"
+                            onClick={() =>
+                                onReact(reaction.emoji, comment.id, false)
+                            }
+                        >
+                            <span>{reaction.emoji}</span>
+                            <span>{reaction.count}</span>
+                        </div>
                     </div>
                 ))}
 

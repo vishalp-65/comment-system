@@ -11,13 +11,23 @@ export const formatDate = (createdAt: {
         (currentDate.getTime() - pastDate.getTime()) / 1000
     );
 
-    const minutes = Math.floor(diffInSeconds / 60);
-    const hours = Math.floor(diffInSeconds / 3600);
-    const days = Math.floor(diffInSeconds / 86400);
-    const weeks = Math.floor(diffInSeconds / 604800);
-    const months = Math.floor(diffInSeconds / 2592000);
-    const years = Math.floor(diffInSeconds / 31536000);
+    // Define time units in seconds
+    const secondsInMinute = 60;
+    const secondsInHour = 3600;
+    const secondsInDay = 86400;
+    const secondsInWeek = 604800;
+    const secondsInMonth = 2592000; // Rough approximation (30 days)
+    const secondsInYear = 31536000; // Rough approximation (365 days)
 
+    // Calculate the differences in various units
+    const years = Math.floor(diffInSeconds / secondsInYear);
+    const months = Math.floor(diffInSeconds / secondsInMonth);
+    const weeks = Math.floor(diffInSeconds / secondsInWeek);
+    const days = Math.floor(diffInSeconds / secondsInDay);
+    const hours = Math.floor(diffInSeconds / secondsInHour);
+    const minutes = Math.floor(diffInSeconds / secondsInMinute);
+
+    // Return the most appropriate relative time string
     if (years > 0) return `${years} year${years > 1 ? "s" : ""} ago`;
     if (months > 0) return `${months} month${months > 1 ? "s" : ""} ago`;
     if (weeks > 0) return `${weeks} week${weeks > 1 ? "s" : ""} ago`;
