@@ -7,7 +7,7 @@ const NavBar = () => {
     const { user } = useAuth();
 
     return (
-        <div className="flex items-center justify-between px-4 py-1">
+        <div className="flex items-center justify-between px-4 py-1 mt-1">
             <div className="flex items-center gap-2 justify-start">
                 {user && (
                     <Image

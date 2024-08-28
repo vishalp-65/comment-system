@@ -10,3 +10,8 @@
     border-radius: 10px;
     box-shadow: 0px 0px 26px -8px rgba(0, 0, 0, 0.45);
 }
+
+.text-editor-content a {
+    color: blue;
+    text-decoration: underline; /* Optional: add underline to distinguish links */
+}

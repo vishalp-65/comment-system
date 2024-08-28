@@ -58,9 +58,9 @@ const CommentSection = () => {
     }, [sortBy]);
 
     return (
-        <div className="commentShadow border py-8 px-10">
-            <div className="flex items-center justify-between px-2">
-                <h1 className="text-2xl font-bold mb-4">
+        <div className="commentShadow border py-8 px-8 md:px-10">
+            <div className="flex items-center justify-between px-2 flex-wrap">
+                <h1 className="text-2xl font-bold mb-4 text-center">
                     Comments ({comments.length})
                 </h1>
                 <div className="flex items-center justify-between rounded-md border border-gray-300">

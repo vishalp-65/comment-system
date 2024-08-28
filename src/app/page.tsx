@@ -15,7 +15,7 @@ export default function Home() {
     return (
         <>
             <NavBar />
-            <div className="w-full p-10">
+            <div className="w-full p-3 md:p-10">
                 <CommentSection />
             </div>
         </>

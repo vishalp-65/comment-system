@@ -1,13 +1,17 @@
 import { formatDate } from "@/utils/helper";
 import Image from "next/image";
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { MdOutlineEmojiEmotions } from "react-icons/md";
 import EmojiContainer from "../EmojiContainer";
 import { CommentCardProps } from "@/types/comment";
+import sanitizeHtml from "sanitize-html";
 
 const CommentCard = ({ comment, onReply, onReact }: CommentCardProps) => {
     const [isEmoji, setEmoji] = useState(false);
+    const [content, setContent] = useState("");
     const [isExpanded, setExpanded] = useState(false);
+    const [showMore, setShowMore] = useState(false);
+    const contentRef = useRef<HTMLDivElement>(null);
     let hideTimeout: NodeJS.Timeout;
 
     const showEmojiContainer = () => {
@@ -29,13 +33,35 @@ const CommentCard = ({ comment, onReply, onReact }: CommentCardProps) => {
         setExpanded(false);
     };
 
-    const isContentLong = comment.content.length > 120;
-    const displayedContent = isExpanded
-        ? comment.content
-        : comment.content.slice(0, 120) + "...";
+    const highlightTags = (content: string) => {
+        return content.replace(
+            /@(\w+)/g,
+            '<span class="bg-blue-300 p-1 rounded-md"><span class="text-blue-800">@$1</span></div>'
+        );
+    };
+
+    useEffect(() => {
+        const checkIfContentExceeds = () => {
+            const contentElement = contentRef.current;
+            if (contentElement) {
+                const lineHeight = parseInt(
+                    window.getComputedStyle(contentElement).lineHeight
+                );
+                const maxHeight = lineHeight * 3;
+
+                if (contentElement.offsetHeight > maxHeight) {
+                    setShowMore(true);
+                } else {
+                    setShowMore(false);
+                }
+            }
+        };
+
+        checkIfContentExceeds();
+    }, [comment.content]);
 
     return (
-        <div className="p-2 flex flex-col gap-3">
+        <div className="p-2 w-full flex flex-col gap-3">
             <div className="flex flex-col items-start justify-between gap-3">
                 <div className="flex items-center justify-start gap-3">
                     <Image
@@ -50,10 +76,16 @@ const CommentCard = ({ comment, onReply, onReact }: CommentCardProps) => {
 
                 <div className="text-gray-700">
                     <div
-                        className="content"
-                        dangerouslySetInnerHTML={{ __html: displayedContent }}
+                        ref={contentRef}
+                        className={`content text-editor-content text-wrap w-[20rem] md:w-fit ${
+                            isExpanded ? "" : "max-h-[7em] overflow-hidden"
+                        }`}
+                        style={{ whiteSpace: "pre-wrap" }}
+                        dangerouslySetInnerHTML={{
+                            __html: highlightTags(comment.content),
+                        }}
                     />
-                    {isContentLong && !isExpanded && (
+                    {showMore && !isExpanded && (
                         <button
                             onClick={handleShowMore}
                             className="text-black text-sm font-semibold mt-1"
@@ -61,7 +93,7 @@ const CommentCard = ({ comment, onReply, onReact }: CommentCardProps) => {
                             Show More
                         </button>
                     )}
-                    {isContentLong && isExpanded && (
+                    {isExpanded && (
                         <button
                             onClick={handleShowLess}
                             className="text-black text-sm font-semibold mt-1"
@@ -85,7 +117,7 @@ const CommentCard = ({ comment, onReply, onReact }: CommentCardProps) => {
             </div>
 
             {/* Comment bottom part */}
-            <div className="relative flex items-center justify-start gap-4">
+            <div className="relative flex items-center justify-start gap-4 flex-wrap">
                 <div
                     className="relative"
                     onMouseEnter={showEmojiContainer}
@@ -103,14 +135,14 @@ const CommentCard = ({ comment, onReply, onReact }: CommentCardProps) => {
                     )}
                 </div>
 
-                <div className="flex items-center justify-start gap-2">
+                <div className="flex items-center justify-start gap-2 flex-wrap">
                     {comment?.reactions?.map((reaction) => (
                         <div
                             key={reaction.emoji}
                             className="flex items-center gap-1 cursor-pointer"
                         >
                             <div
-                                className="bg-gray-100 border border-gray-300 px-1.5 rounded-full space-x-1 hover:scale-110 transition"
+                                className="bg-gray-100 border flex-nowrap border-gray-300 px-1.5 rounded-full space-x-1 hover:scale-110 transition"
                                 onClick={() =>
                                     onReact(reaction.emoji, comment.id, false)
                                 }

@@ -11,11 +11,13 @@ import {
 } from "firebase/storage";
 import Image from "next/image";
 import { IoClose } from "react-icons/io5";
+import { MdOutlineAddLink } from "react-icons/md";
 
 interface FormatType {
     bold: boolean;
     italic: boolean;
     underline: boolean;
+    link: boolean;
 }
 
 const TextEditor = ({
@@ -32,6 +34,7 @@ const TextEditor = ({
         bold: false,
         italic: false,
         underline: false,
+        link: false,
     });
     const { user } = useAuth();
     const [fileURL, setFileURL] = useState<string | null>(null);
@@ -130,6 +133,7 @@ const TextEditor = ({
                 bold: false,
                 italic: false,
                 underline: false,
+                link: false,
             });
             setFileURL(null); // Reset file URL after saving
             setCharCount(0); // Reset character count after saving
@@ -168,7 +172,7 @@ const TextEditor = ({
                 <div
                     ref={editorRef}
                     contentEditable
-                    className="p-2 min-h-20 outline-none"
+                    className="p-2 min-h-20 max-h-52 outline-none overflow-y-scroll"
                     style={{ whiteSpace: "pre-wrap" }}
                 ></div>
 
@@ -203,8 +207,8 @@ const TextEditor = ({
                 )}
 
                 {/* Text format buttons */}
-                <div className="flex items-start justify-between mt-2">
-                    <div className="mt-3 text-lg flex items-center gap-1.5 justify-start">
+                <div className="flex flex-col md:flex md:flex-col gap-2 md:gap-0 items-start justify-between mt-2">
+                    <div className="mt-3 text-base md:text-lg flex items-center gap-1.5 flex-wrap justify-start">
                         <button
                             onClick={() => handleFormat("bold")}
                             className={`px-2 py-1 font-semibold text-gray-500 hover:text-black hover:scale-110 hover:bg-gray-100 hover:rounded-md ${
@@ -223,7 +227,7 @@ const TextEditor = ({
                                     : ""
                             } `}
                         >
-                            <i>I</i>
+                            I
                         </button>
                         <button
                             onClick={() => handleFormat("underline")}
@@ -234,6 +238,19 @@ const TextEditor = ({
                             } `}
                         >
                             <u>U</u>
+                        </button>
+                        <button
+                            onClick={() => {
+                                const url = prompt("Enter the URL");
+                                if (url) applyStyle("createLink", url);
+                            }}
+                            className={`px-2 py-1 text-2xl font-semibold text-gray-500 hover:text-black hover:scale-110 hover:bg-gray-100 hover:rounded-md ${
+                                activeFormat.link
+                                    ? "bg-gray-200/90 text-gray-950 rounded-md"
+                                    : ""
+                            } `}
+                        >
+                            <MdOutlineAddLink />
                         </button>
 
                         <label className="text-gray-500 hover:text-black hover:scale-110 hover:bg-gray-100 hover:rounded-md px-2 py-1 font-semibold cursor-pointer">
@@ -248,7 +265,7 @@ const TextEditor = ({
                     </div>
 
                     {/* Save and Cancel buttons */}
-                    <div>
+                    <div className="flex items-center gap-1">
                         {isReply && (
                             <button
                                 onClick={handleCancel}
