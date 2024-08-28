@@ -3,29 +3,7 @@ import Image from "next/image";
 import React, { useState } from "react";
 import { MdOutlineEmojiEmotions } from "react-icons/md";
 import EmojiContainer from "../EmojiContainer";
-import { int } from "aws-sdk/clients/datapipeline";
-
-interface Reaction {
-    emoji: string;
-    userId: string;
-    count: int;
-}
-
-interface CommentCardProps {
-    comment: {
-        id: string;
-        content: string;
-        userId: string;
-        userName: string;
-        fileURL: string;
-        userPhoto: string;
-        reactions: Reaction[];
-        createdAt: { seconds: number; nanoseconds: number };
-        replies?: CommentCardProps["comment"][];
-    };
-    onReply: (commentId: string) => void;
-    onReact: (emoji: string, commentId: string, isReply: boolean) => void; // Add isReply parameter
-}
+import { CommentCardProps } from "@/types/comment";
 
 const CommentCard = ({ comment, onReply, onReact }: CommentCardProps) => {
     const [isEmoji, setEmoji] = useState(false);
@@ -67,6 +45,7 @@ const CommentCard = ({ comment, onReply, onReact }: CommentCardProps) => {
                         alt="Comment Image"
                         width={100}
                         height={100}
+                        className="rounded-md w-auto h-auto ml-1"
                     />
                 )}
             </div>

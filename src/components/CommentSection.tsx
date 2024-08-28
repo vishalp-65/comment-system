@@ -24,14 +24,13 @@ const CommentSection = () => {
             setComments(data.comments);
             console.log("comment data", comments);
         } catch (error) {
-            console.error("Failed to fetch comments", error);
             toast.error("Failed to load comments");
         } finally {
             setIsLoading(false); // Ensure loading is set to false after fetching
         }
     };
 
-    const handleSaveComment = async (content: string) => {
+    const handleSaveComment = async (content: string, fileURL?: string) => {
         if (!content.trim()) {
             toast.error("Please enter a comment");
             return;
@@ -40,6 +39,7 @@ const CommentSection = () => {
         try {
             await axios.post("/api/comment", {
                 content,
+                fileURL: fileURL || "",
                 userName: user?.displayName,
                 userPhoto: user?.photoURL,
                 userId: user?.uid,
@@ -48,13 +48,12 @@ const CommentSection = () => {
             toast.success("Comment created");
             fetchComments(); // Refetch comments after adding a new one
         } catch (error) {
-            console.error("Failed to create comment", error);
             toast.error("Failed to create comment");
         }
     };
 
     return (
-        <div className="commentShadow border py-5 px-7">
+        <div className="commentShadow border py-8 px-10">
             <div className="flex items-center justify-between px-2">
                 <h1 className="text-2xl font-bold mb-4">
                     Comments ({comments.length})

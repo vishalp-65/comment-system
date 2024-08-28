@@ -28,12 +28,12 @@ export const formatDate = (createdAt: {
     const minutes = Math.floor(diffInSeconds / secondsInMinute);
 
     // Return the most appropriate relative time string
-    if (years > 0) return `${years} year${years > 1 ? "s" : ""} ago`;
-    if (months > 0) return `${months} month${months > 1 ? "s" : ""} ago`;
-    if (weeks > 0) return `${weeks} week${weeks > 1 ? "s" : ""} ago`;
-    if (days > 0) return `${days} day${days > 1 ? "s" : ""} ago`;
-    if (hours > 0) return `${hours} hour${hours > 1 ? "s" : ""} ago`;
-    if (minutes > 0) return `${minutes} minute${minutes > 1 ? "s" : ""} ago`;
+    if (years > 0) return `${years} year${years > 1 ? "s" : ""}`;
+    if (months > 0) return `${months} month${months > 1 ? "s" : ""}`;
+    if (weeks > 0) return `${weeks} week${weeks > 1 ? "s" : ""}`;
+    if (days > 0) return `${days} day${days > 1 ? "s" : ""}`;
+    if (hours > 0) return `${hours} hour${hours > 1 ? "s" : ""}`;
+    if (minutes > 0) return `${minutes} minute${minutes > 1 ? "s" : ""}`;
 
-    return `${diffInSeconds} second${diffInSeconds > 1 ? "s" : ""} ago`;
+    return `${diffInSeconds} second${diffInSeconds > 1 ? "s" : ""}`;
 };

@@ -16,13 +16,14 @@ export default async function handler(
     const { commentId } = req.query;
 
     if (req.method === "POST") {
-        const { content, userId, userName, userPhoto } = req.body;
+        const { content, userId, userName, userPhoto, fileURL } = req.body;
 
         try {
             // Create a new reply in the "replies" collection with a unique ID
             const replyDocRef = await addDoc(collection(db, "replies"), {
                 content,
                 userId,
+                fileURL: fileURL || "",
                 userName,
                 userPhoto,
                 commentId,

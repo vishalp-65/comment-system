@@ -16,13 +16,18 @@ const CommentsList = ({ comments, fetchComments }: CommentListProps) => {
 
     const [activeCommentId, setActiveCommentId] = useState<string | null>(null);
 
-    const handleReply = async (content: string, commentId: string) => {
+    const handleReply = async (
+        content: string,
+        commentId: string,
+        fileURL?: string
+    ) => {
         if (!content) return;
 
         try {
             await axios.post(`/api/comment/${commentId}/reply`, {
                 content: content,
                 userId: user?.uid,
+                fileURL: fileURL || "",
                 userName: user?.displayName,
                 userPhoto: user?.photoURL,
             });
@@ -88,8 +93,12 @@ const CommentsList = ({ comments, fetchComments }: CommentListProps) => {
                         {activeCommentId === comment.id && (
                             <div className="ml-8 mt-2">
                                 <TextEditor
-                                    onSave={(content) =>
-                                        handleReply(content, comment.id)
+                                    onSave={(content, fileURL) =>
+                                        handleReply(
+                                            content,
+                                            comment.id,
+                                            fileURL
+                                        )
                                     }
                                     onCancel={handleCancelReply}
                                     isReply={true}
