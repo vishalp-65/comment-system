@@ -1,36 +1,103 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
-## Getting Started
+# Comment System with Infinite Scrolling
 
-First, run the development server:
+This project is a comment system with infinite scrolling functionality, built using React and Firebase. Users can post comments, view them in a sorted manner, and see more comments load as they scroll.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Setup and Installation
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Prerequisites
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- Node.js (v14 or later)
+- Firebase account and project
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+### Cloning the Repository
 
-## Learn More
+1. Clone the repository:
 
-To learn more about Next.js, take a look at the following resources:
+   ```bash
+   git clone https://github.com/vishalp-65/comment-system.git
+   ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+2. Navigate into the project directory:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+   ```bash
+   cd comment_system
+   ```
 
-## Deploy on Vercel
+### Install Dependencies
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+3. Install the required dependencies:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+   ```bash
+   npm install
+   ```
+
+### Firebase Setup
+
+4. Set up Firebase:
+
+   - Go to the [Firebase Console](https://console.firebase.google.com/).
+   - Create a new project or use an existing one.
+   - Go to the **Project settings** and find your Firebase config. You will need the following information:
+
+     - API Key
+     - Auth Domain
+     - Project ID
+     - Messaging Sender ID
+     - App ID
+     - Measurement ID
+
+### Environment Variables
+
+5. Create a `.env.local` file in the root directory of the project and add your Firebase configuration details:
+
+   ```plaintext
+   NEXT_PUBLIC_FIREBASE_API_KEY=your-firebase-api-key
+   NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your-firebase-auth-domain
+   NEXT_PUBLIC_FIREBASE_PROJECT_ID=your-firebase-project-id
+   NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your-firebase-storage-bucket
+   NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your-firebase-messaging-sender-id
+   NEXT_PUBLIC_FIREBASE_APP_ID=your-firebase-app-id
+   NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=your-firebase-measurement-id
+   ```
+
+### Running the Development Server
+
+6. Start the development server:
+
+   ```bash
+   npm run dev
+   ```
+
+   The application will be available at `http://localhost:3000`.
+
+### Building for Production
+
+7. Build the project for production:
+
+   ```bash
+   npm run build
+   ```
+
+   This command generates a `.next` folder containing the optimized build.
+
+8. Start the production server:
+
+   ```bash
+   npm start
+   ```
+
+### API Endpoints
+
+- **GET /api/comment?sortBy=<sortBy>&page=<page>&pageSize=<pageSize>**: Fetches comments with pagination and sorting.
+- **POST /api/comment**: Creates a new comment.
+- **POST /api/comment/commentId/reactions**: Reaction for a particular comment
+- - **POST /api/comment/commentId/reply**: Reply to a particular comment a particular comment
+
+### Additional Information
+
+- **Firebase Configuration**: Ensure that your Firebase rules allow read and write access as needed for the application.
+- **Error Handling**: Error handling is implemented for API calls and Firebase interactions.
+
+Feel free to open an issue or submit a pull request if you encounter any problems or have suggestions for improvements.
+
