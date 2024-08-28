@@ -12,15 +12,16 @@ const CommentSection = () => {
     const { user } = useAuth();
     const [isLoading, setIsLoading] = useState<boolean>(true); // Set to true initially to show loader on mount
     const [comments, setComments] = useState<Comment[]>([]);
+    const [sortBy, setSortBy] = useState("createdAt");
 
     // Fetch comments on component mount
     useEffect(() => {
-        fetchComments();
+        fetchComments(sortBy);
     }, []);
 
-    const fetchComments = async () => {
+    const fetchComments = async (sortBy: String) => {
         try {
-            const { data } = await axios.get("/api/comment");
+            const { data } = await axios.get(`/api/comment?sortBy=${sortBy}`);
             setComments(data.comments);
             console.log("comment data", comments);
         } catch (error) {
@@ -46,11 +47,15 @@ const CommentSection = () => {
             });
 
             toast.success("Comment created");
-            fetchComments(); // Refetch comments after adding a new one
+            fetchComments(sortBy); // Refetch comments after adding a new one
         } catch (error) {
             toast.error("Failed to create comment");
         }
     };
+
+    useEffect(() => {
+        fetchComments(sortBy);
+    }, [sortBy]);
 
     return (
         <div className="commentShadow border py-8 px-10">
@@ -58,15 +63,31 @@ const CommentSection = () => {
                 <h1 className="text-2xl font-bold mb-4">
                     Comments ({comments.length})
                 </h1>
-                <div className="flex items-center justify-between rounded-md gap-3 border border-gray-300">
-                    <p className="bg-slate-200 px-2 py-1.5 cursor-pointer">
+                <div className="flex items-center justify-between rounded-md border border-gray-300">
+                    <p
+                        className={`px-2 py-1.5 cursor-pointer ${
+                            sortBy === "createdAt"
+                                ? "bg-slate-200 text-black font-semibold"
+                                : ""
+                        }`}
+                        onClick={() => setSortBy("createdAt")}
+                    >
                         Latest
                     </p>
-                    <p className="py-1.5 pr-2 cursor-pointer">Popular</p>
+                    <p
+                        className={`py-1.5 px-2 cursor-pointer ${
+                            sortBy === "popular"
+                                ? "bg-slate-200 text-black font-semibold"
+                                : ""
+                        }`}
+                        onClick={() => setSortBy("popular")}
+                    >
+                        Popular
+                    </p>
                 </div>
             </div>
 
-            <div className="my-5">
+            <div className="my-4">
                 <TextEditor
                     onSave={handleSaveComment}
                     isReply={false}

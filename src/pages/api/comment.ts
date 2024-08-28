@@ -25,11 +25,11 @@ export default async function handler(
             // Fetch comments
             const commentsQuery = query(
                 collection(db, "comments"),
-                orderBy(sortBy as string, "desc")
+                orderBy("createdAt", "desc") // Default ordering by createdAt
             );
 
             const querySnapshot = await getDocs(commentsQuery);
-            const comments = [];
+            let comments = [];
 
             for (const commentDoc of querySnapshot.docs) {
                 const commentData = commentDoc.data();
@@ -52,12 +52,21 @@ export default async function handler(
                 // Attach reactions with their counts
                 const reactions = commentData.reactions || [];
 
+                // Calculate total reactions count
+                const totalReactions = reactions.length;
+
                 comments.push({
                     id: commentDoc.id,
                     ...commentData,
                     reactions,
                     replies, // Include the fetched replies in the response
+                    totalReactions, // Include total reactions count
                 });
+            }
+
+            // Sort comments by popularity if requested
+            if (sortBy === "popular") {
+                comments.sort((a, b) => b.totalReactions - a.totalReactions);
             }
 
             res.status(200).json({ comments });
@@ -82,6 +91,7 @@ export default async function handler(
                 userId,
                 createdAt: Timestamp.fromDate(new Date()),
                 replies: [],
+                reactions: [],
             });
 
             res.status(201).json({ message: "Comment added successfully" });

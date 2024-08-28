@@ -8,7 +8,7 @@ import toast from "react-hot-toast";
 
 interface CommentListProps {
     comments: any;
-    fetchComments: () => void;
+    fetchComments: (sortBy: string) => void;
 }
 
 const CommentsList = ({ comments, fetchComments }: CommentListProps) => {
@@ -32,7 +32,7 @@ const CommentsList = ({ comments, fetchComments }: CommentListProps) => {
                 userPhoto: user?.photoURL,
             });
             setActiveCommentId(null);
-            fetchComments();
+            fetchComments("createdAt");
 
             toast.success("Successfully replied");
         } catch (error) {
@@ -67,18 +67,16 @@ const CommentsList = ({ comments, fetchComments }: CommentListProps) => {
                     emoji: emoji,
                 }
             );
-            fetchComments();
-
-            toast.success("Reaction added");
+            fetchComments("createdAt");
         } catch (error) {
             console.log("error", error);
             toast.error("Reaction not added");
         }
     };
 
-    useEffect(() => {
-        fetchComments();
-    }, []);
+    // useEffect(() => {
+    //     fetchComments();
+    // }, []);
 
     return (
         <div>

@@ -7,6 +7,7 @@ import { CommentCardProps } from "@/types/comment";
 
 const CommentCard = ({ comment, onReply, onReact }: CommentCardProps) => {
     const [isEmoji, setEmoji] = useState(false);
+    const [isExpanded, setExpanded] = useState(false);
     let hideTimeout: NodeJS.Timeout;
 
     const showEmojiContainer = () => {
@@ -19,6 +20,19 @@ const CommentCard = ({ comment, onReply, onReact }: CommentCardProps) => {
             setEmoji(false);
         }, 500);
     };
+
+    const handleShowMore = () => {
+        setExpanded(true);
+    };
+
+    const handleShowLess = () => {
+        setExpanded(false);
+    };
+
+    const isContentLong = comment.content.length > 120;
+    const displayedContent = isExpanded
+        ? comment.content
+        : comment.content.slice(0, 120) + "...";
 
     return (
         <div className="p-2 flex flex-col gap-3">
@@ -34,24 +48,44 @@ const CommentCard = ({ comment, onReply, onReact }: CommentCardProps) => {
                     <p className="font-semibold">{comment.userName}</p>
                 </div>
 
-                <div
-                    className="text-gray-700"
-                    dangerouslySetInnerHTML={{ __html: comment.content }}
-                />
+                <div className="text-gray-700">
+                    <div
+                        className="content"
+                        dangerouslySetInnerHTML={{ __html: displayedContent }}
+                    />
+                    {isContentLong && !isExpanded && (
+                        <button
+                            onClick={handleShowMore}
+                            className="text-black text-sm font-semibold mt-1"
+                        >
+                            Show More
+                        </button>
+                    )}
+                    {isContentLong && isExpanded && (
+                        <button
+                            onClick={handleShowLess}
+                            className="text-black text-sm font-semibold mt-1"
+                        >
+                            Show Less
+                        </button>
+                    )}
+                </div>
 
                 {comment.fileURL && (
-                    <Image
-                        src={comment.fileURL}
-                        alt="Comment Image"
-                        width={100}
-                        height={100}
-                        className="rounded-md w-auto h-auto ml-1"
-                    />
+                    <div className="relative w-52 h-52 ml-1">
+                        <Image
+                            src={comment.fileURL}
+                            alt="Comment Image"
+                            layout="fill"
+                            objectFit="cover"
+                            className="rounded-md"
+                        />
+                    </div>
                 )}
             </div>
 
             {/* Comment bottom part */}
-            <div className="relative flex items-center justify-start gap-2">
+            <div className="relative flex items-center justify-start gap-4">
                 <div
                     className="relative"
                     onMouseEnter={showEmojiContainer}
@@ -69,22 +103,24 @@ const CommentCard = ({ comment, onReply, onReact }: CommentCardProps) => {
                     )}
                 </div>
 
-                {comment?.reactions?.map((reaction) => (
-                    <div
-                        key={reaction.emoji}
-                        className="flex items-center gap-1 cursor-pointer"
-                    >
+                <div className="flex items-center justify-start gap-2">
+                    {comment?.reactions?.map((reaction) => (
                         <div
-                            className="bg-gray-200 px-1 rounded-full space-x-1"
-                            onClick={() =>
-                                onReact(reaction.emoji, comment.id, false)
-                            }
+                            key={reaction.emoji}
+                            className="flex items-center gap-1 cursor-pointer"
                         >
-                            <span>{reaction.emoji}</span>
-                            <span>{reaction.count}</span>
+                            <div
+                                className="bg-gray-100 border border-gray-300 px-1.5 rounded-full space-x-1 hover:scale-110 transition"
+                                onClick={() =>
+                                    onReact(reaction.emoji, comment.id, false)
+                                }
+                            >
+                                <span>{reaction.emoji}</span>
+                                <span>{reaction.count}</span>
+                            </div>
                         </div>
-                    </div>
-                ))}
+                    ))}
+                </div>
 
                 <div className="border border-r border-gray-400 h-3" />
 
